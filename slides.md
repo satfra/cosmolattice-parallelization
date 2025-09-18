@@ -77,6 +77,22 @@ The last comment block of each slide will be treated as slide notes. It will be 
 -->
 
 ---
+layout: intro
+transition: slide-left
+---
+
+# Parallelization of CosmoLattice computations
+<style>
+h1 {
+  display: inline;
+}
+h2 {
+  display: inline;
+}
+</style>
+
+
+---
 layout: cover
 transition: slide-left
 background: https://images.unsplash.com/photo-1612334001559-947862cc2202?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
@@ -491,7 +507,7 @@ $$
 
 <v-switch at=0>
 <template #0>
-<img src="/Stencil.png"/>
+<img src="/Grid_stencil_nogrid.png"/>
 </template>
 <template #2>
 <img src="/Stencil_num.png"/>
@@ -609,11 +625,11 @@ int main(int argc, char **argv)
 
     for (size_t i = 0; i < nSteps; ++i) {
       pi.updateGhosts();
-      device::fence();
+      device::iteration::fence();
       measurer.measure("timestepping", [&]() {
         pi = LatticeLaplacian<NDim, decltype(phi)>(phi); // kick
         phi = phi + dt * pi;                             // drift
-        device::fence();
+        device::iteration::fence();
       });
     }
   });
@@ -624,15 +640,15 @@ int main(int argc, char **argv)
 }
 ```
 
-```cpp {6,7|6,7}
+```cpp {6,7}
 ...
     for (size_t i = 0; i < nSteps; ++i) {
       pi.updateGhosts();
-      device::fence();
+      device::iteration::fence();
       measurer.measure("timestepping", [&]() {
         pi = LatticeLaplacian<NDim, decltype(phi)>(phi); // kick
         phi = phi + dt * pi;                             // drift
-        device::fence();
+        device::iteration::fence();
       });
     }
 ```
@@ -640,64 +656,31 @@ int main(int argc, char **argv)
 
 <v-click at=1>
 
-# NVIDIA 4070RTX mobile - 4788 Cores @ 2.175 GHz
-<div class="grid grid-cols-[15%_25%_15%_25%] gap-4">
+<div class="grid grid-cols-[2%_52%_48%] gap-4">
 <div></div>
-<div>
+<div style="margin-top:20mm;">
 
-### Coalesced access
-```
-    Tag:            timestepping
-        | Average :   34ms 592us
-        | Std Dev :    5ms 903us
-        |   Count :          512
-```
+# Running this on my PC:
+<br>
+&nbsp;&nbsp;<h2 color="purple">GPU</h2>: NVIDIA 4070RTX mobile - 4788 Cores @ 2.175 GHz<br>
+<br>
+<br>
+&nbsp;&nbsp;<h2 color="green">CPU</h2>: Ryzen 9 7945HX - 16 Cores @ 5.4GHz
 </div>
-<div></div>
-<div>
 
-### Sequential access
-```
-    Tag:            timestepping
-        | Average :  226ms 722us
-        | Std Dev :    5ms 878us
-        |   Count :          512
-```
+<div>
+<br>
+<img src="/coalesced_sequential.png" style="width:450px;height:auto;">
 </div>
 </div>
 </v-click>
 
-&nbsp;
+<style>
+h2 {
+  display: inline;
+}
+</style>
 
-<v-click at=2>
-
-# Ryzen 9 7945HX - 16 Cores @ 5.4GHz
-<div class="grid grid-cols-[15%_25%_15%_25%] gap-4">
-<div></div>
-<div>
-
-### Coalesced access
-```
-    Tag:            timestepping
-        | Average :  300ms 137us
-        | Std Dev :   22ms 162us
-        |   Count :          512
-```
-</div>
-<div></div>
-<div>
-
-### Sequential access
-```
-    Tag:            timestepping
-        | Average :  191ms 577us
-        | Std Dev :   20ms 531us
-        |   Count :          512
-```
-</div>
-</div>
-
-</v-click>
 
 ---
 layout: default
@@ -710,7 +693,6 @@ zoom: 0.8
 <div class="grid grid-cols-[52%_48%] gap-4">
 <div>
 
-````md magic-move {lines: true}
 ```cpp
   ...
   Benchmark bench([&](Benchmark::Measurer &measurer) {
@@ -743,47 +725,46 @@ zoom: 0.8
   });
   ...
 ```
-
-```
-    Tag:                  ghosts        Tag:        initialize field
-        | Average :    9ms 969us            | Average :  807ms 772us
-        | Std Dev :    7ms 735us            | Std Dev :          0us
-        | Count :            512            | Count :              1
-
-    Tag:            k->x fourier        Tag:            timestepping
-        | Average :  879ms 409us            | Average :  229ms 636us
-        | Std Dev :          0us            | Std Dev :   12ms 495us
-        | Count :              1            | Count :            512
-
-    Tag:            x->k fourier
-        | Average :  852ms 513us
-        | Std Dev :          0us
-        | Count :              1
-```
-````
-
 </div>
 
 <div>
-```
-    Tag:                  ghosts        Tag:        initialize field
-        | Average :  598us 154ns            | Average :    39ms 27us
-        | Std Dev :        262ns            | Std Dev :          0us
-        | Count :            512            | Count :              1
 
-    Tag:            k->x fourier        Tag:            timestepping
-        | Average :      3s 67ms            | Average :   24ms 930us
-        | Std Dev :          0ms            | Std Dev :          0us
-        | Count :              1            | Count :            512
-
-    Tag:            x->k fourier
-        | Average :     2s 729ms
-        | Std Dev :          0ms
-        | Count :              1
-
-```
+<v-switch>
+<template #1-3>
+<div style="height:380px">
+<ImageFigure
+  src="/split_0.png"
+  height="90%"
+  width="auto"
+/>
 </div>
+</template>
+<template #3-5>
+<div style="height:380px">
+<ImageFigure
+  src="/split_1.png"
+  height="90%"
+  width="auto"
+/>
+</div>
+</template>
+</v-switch>
 
+<div style="margin-left:10mm;">
+<v-click at=2>
+
+-  Fourier transformation is not yet optimized.
+
+<br><div style="margin-left:10mm; margin-top:-12mm; font-size:0.7em">(take later benchmarks with a grain of salt!)</div>
+</v-click>
+<v-click at=4>
+
+-  Much faster random numbers: **Philox** algorithm.
+
+<br><div style="margin-left:10mm; margin-top:-12mm; font-size:0.7em">(deterministic, stateless and fully parallel)</div>
+</v-click>
+</div>
+</div>
 </div>
 
 ---
@@ -791,24 +772,53 @@ layout: default
 transition: slide-left
 ---
 
-# Benchmarking the $\phi^4$-theory
+# Benchmarking $\phi^4$-theory 
+with the `lphi4` model in CosmoLattice
 
-<div class="grid grid-cols-[20%_60%_20%] gap-4">
-<div></div>
+<div class="grid grid-cols-[30%_30%_30%] gap-4">
+<div><ImageFigure
+  src="/bench_128.png"
+  height="90%"
+  width="auto"
+/></div>
+
+<div v-click><ImageFigure
+  src="/bench_256.png"
+  height="90%"
+  width="auto"
+/></div>
+
+<div v-click><ImageFigure
+  src="/bench_512.png"
+  height="90%"
+  width="auto"
+/></div>
+</div>
+
+<div class="grid grid-cols-[25%_45%_30%] gap-4" style="margin-top:-20mm;" v-click>
+<div>
+</div>
 <div>
 ```
 ┌───────┬─────────────┬─────────────┬─────────────┬──────────────────┐
 │       │        CUDA │      OpenMP │         MPI │ speedup CUDA/MPI │
 │       │ runtime [s] │ runtime [s] │ runtime [s] │           factor │
 ├───────┼─────────────┼─────────────┼─────────────┼──────────────────┤
-│ N=128 │      26.547 │      57.608 │       52.95 │          1.99458 │
-│ N=256 │      215.68 │      951.42 │      919.94 │           4.2653 │
-│ N=512 │      2259.8 │     14147.0 │     15471.0 │          6.84618 │
+│ N=128 │          27 │          58 │          53 │                2 │
+│ N=256 │         216 │         951 │         920 │                4 │
+│ N=512 │        2260 │       14147 │       15471 │                7 │
 └───────┴─────────────┴─────────────┴─────────────┴──────────────────┘
 ```
 </div>
 </div>
 
+<style>
+.slidev-code {
+  font-size: 0.5em !important;
+  line-height: 0.4em !important;
+  padding: 1em !important;
+}
+</style>
 
 ---
 layout: default
@@ -872,3 +882,9 @@ Using large GPU clusters
 ---
 layout: end
 ---
+
+# Questions?
+
+Thanks for your attention!
+
+Release of CosmoLattice with GPUs ~ early 2026
