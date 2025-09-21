@@ -4,7 +4,7 @@ theme: seriph
 # random image from a curated Unsplash collection by Anthony
 # like them? see https://unsplash.com/collections/94734566/slidev
 # background: /CL_iconSequence-removebgbis.png
-background: https://images.unsplash.com/photo-1619075120156-f5729c752edf?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+background: /photo1
 #https://cover.sli.dev
 # some information about your slides (markdown enabled)
 title: Cosmolattice on GPUs
@@ -77,25 +77,351 @@ The last comment block of each slide will be treated as slide notes. It will be 
 -->
 
 ---
-layout: intro
-transition: slide-left
+layout: default
+transition: slide-up
 ---
 
-# Parallelization of CosmoLattice computations
+<div class="grid grid-cols-[48%_56%] gap-3">
+<div>
+
+# Why can we parallelize?
+
+And why would we want to?
+
+Example: Solving massless Klein-Gordon equation, $d=1$
+
+<v-switch>
+<template #0>
+$$
+\begin{aligned}
+\partial_t^2 \phi(i) = \Delta_L \phi(i)
+\end{aligned}
+$$
+</template>
+<template #1-7>
+$$
+\begin{aligned}
+\partial_t \pi(i) &= \Delta_L \phi(i) \,, \\
+\partial_t \phi(i) &= \pi(i) \,.
+\end{aligned}
+$$
+
+*(We use the leapfrog scheme.)*
+</template>
+</v-switch>
+
+<v-click at=2>
+
+Stencil of update for **one** lattice site is $s = 1$
+</v-click>
+
+<v-click at=3>
+<br>&nbsp;&nbsp;  <mdi-arrow-right/> Each site can be updated independently.
+</v-click>
+
+<v-click at=4>
+<br>&nbsp;&nbsp;  <mdi-arrow-right/> Only local information needed (neighbours).
+</v-click>
+
+</div>
+
+<div style="margin-top:30mm">
+<ImageFigure
+  src="/1DGridStencil.png"
+  caption=""
+  width="100%"
+  height="auto"
+/>
+
+<v-click at=5>
+
+## We could compute all lattice sites independently!
+
+*See lecture on Friday!*
+
+</v-click>
+
+</div>
+
+</div>
+
+<div class="grid grid-cols-[15%_80%] gap-3">
+<div></div>
+<div style="margin-top:8mm">
+<v-click at=6>
+Less granular: split <h2>sub-regions</h2> of lattice across many computers <h2>(nodes)</h2>
+</v-click>
+</div>
+</div>
+
 <style>
-h1 {
-  display: inline;
+.katex {
+    font-size: 1.0em;
 }
 h2 {
+    background-color: #2B90B6;
+    background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+    background-size: 100%;
+    -webkit-background-clip: text;
+    -moz-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -moz-text-fill-color: transparent;
   display: inline;
 }
 </style>
 
 
 ---
-layout: cover
+layout: fact
+transition: slide-down
+---
+
+<h1> Parallelization </h1> of CosmoLattice simulations requires to split both <h2>computation</h2> and <h2>data</h2> across <h2>nodes</h2>.
+
+<v-click>
+<div class="grid grid-cols-[15%_60%] gap-3" style="margin-top:25mm">
+<div></div>
+<div>
+
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<h3>Type</h3> | <h2>distributed</h2> | <h2>shared</h2>  |
+| --- | -- | ---- |
+| <h3>Data</h3> | split between nodes | shared by all <b>threads</b> |
+| <h3>Computation</h3> | split between nodes | split between threads |
+</div>
+</div>
+</v-click>
+
+<style>
+h1 {
+  display: inline;
+}
+h3 {
+  display: inline;
+}
+h2 {
+    background-color: #2B90B6;
+    background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+    background-size: 100%;
+    -webkit-background-clip: text;
+    -moz-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -moz-text-fill-color: transparent;
+  display: inline;
+}
+</style>
+
+---
+layout: default
+transition: fade
+---
+
+<div class="grid grid-cols-[48%_56%] gap-3">
+<div>
+
+# Why can we parallelize?
+
+And why would we want to?
+
+Example: Solving massless Klein-Gordon equation, $d=1$
+
+$$
+\begin{aligned}
+\partial_t \pi(i) &= \Delta_L \phi(i) \,, \\
+\partial_t \phi(i) &= \pi(i) \,.
+\end{aligned}
+$$
+
+*(We use the leapfrog scheme.)*
+
+Stencil of update for **one** lattice site is $s = 1$
+
+<br>&nbsp;&nbsp;  <mdi-arrow-right/> Each site can be updated independently.
+<br>&nbsp;&nbsp;  <mdi-arrow-right/> Only local information needed (neighbours).
+</div>
+
+<div style="margin-top:23mm">
+<v-switch>
+<template #0>
+<div style="margin-top:7mm;margin-left:1mm">
+<ImageFigure
+  src="/1DGridStencil.png"
+  caption=""
+  width="87%"
+  height="auto"
+/>
+</div>
+</template>
+<template #1-3>
+<ImageFigure
+  src="/1DGridStencil_nodes.png"
+  caption=""
+  width="88%"
+  height="auto"
+/>
+<v-click at=2>
+<h2>Problem:</h2> Data is missing on node 1
+</v-click>
+</template>
+<template #3-5>
+<div style="margin-top:1mm">
+<ImageFigure
+  src="/1DGridStencil_ghosts.png"
+  caption=""
+  width="100%"
+  height="auto"
+/>
+</div>
+<h2>Solution:</h2> Use <h3>ghosts</h3>.
+
+Ghosts are local copies of data on other nodes.
+
+</template>
+
+</v-switch>
+
+</div>
+</div>
+
+<v-click at=4>
+<div class="grid grid-cols-[14%_80%] gap-3" style="margin-top:10mm">
+<div></div>
+<h2>Need to update ghosts after every time-step.</h2>
+</div>
+</v-click>
+
+
+<style>
+.katex {
+    font-size: 1.0em;
+}
+h3 {
+  display: inline;
+}
+h2 {
+    background-color: #2B90B6;
+    background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+    background-size: 100%;
+    -webkit-background-clip: text;
+    -moz-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -moz-text-fill-color: transparent;
+  display: inline;
+}
+</style>
+
+---
+layout: default
 transition: slide-left
-background: https://images.unsplash.com/photo-1612334001559-947862cc2202?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+---
+
+<div class="grid grid-cols-[48%_56%] gap-3">
+<div>
+
+# Data communication
+
+The standard for communication in distributed-memory applications:
+
+<b>M</b>essage <b>P</b>assing <b>I</b>nterface (MPI)
+
+Exchange ghost data over the network automatically after something changes.
+
+</div>
+
+<div style="margin-top:24mm">
+<ImageFigure
+  src="/1DGridStencil_ghosts.png"
+  caption=""
+  width="100%"
+  height="auto"
+/>
+</div>
+</div>
+
+<div class="grid grid-cols-[24%_80%] gap-3" style="margin-top:2mm">
+<div></div>
+<v-click>
+<i>CosmoLattice does this automatically under the hood!</i>
+</v-click>
+</div>
+
+
+---
+layout: default
+transition: slide-left
+---
+
+<div class="grid grid-cols-[70%_30%] gap-3">
+<div>
+
+# FFT parallelization
+
+
+-  **FFTW** supports parallelization along 1 direction.
+
+<v-clicks at=1>
+
+-  Improved scaling for many nodes: **PFFT** allows for parallelization in any dimensions.
+
+-  To keep data transfer due to ghost exchange manageable, parallelization along $d-1$ directions.
+</v-clicks>
+
+<v-click at=3>
+<div class="grid grid-cols-[10%_75%] gap-3">
+<div></div>
+<div>
+<ImageFigure
+  src="/speed_up.png"
+  caption="Figure 3: Speed up factor in parallelized simulations as a number of cores (tested on the Gacrux cluster
+from the EPFL HPC center SCITAS, Switzerland). 
+"
+  width="82%"
+  height="auto"
+/>
+
+<div style="font-size:0.5em;margin-top:-2mm"><i>Figure from arXiv:2102.01031 [astro-ph.CO]</i></div>
+<br>
+</div>
+</div>
+</v-click>
+</div>
+
+<div style="margin-top:-5mm">
+<ImageFigure
+  src="/Cube_1D.png"
+  caption=""
+  width="100%"
+  height="auto"
+/>
+<v-click at=1>
+<ImageFigure
+  src="/Cube_2D.png"
+  caption=""
+  width="100%"
+  height="auto"
+/>
+</v-click>
+</div>
+</div>
+
+<style>
+.katex {
+    font-size: 1.0em;
+}
+</style>
+
+---
+layout: end
+transition: slide-up
+---
+
+# Questions?
+
+Tomorrow: Shared-memory parallelization with GPUs.
+
+
+---
+layout: cover
+background: /photo2
 ---
 
 <img src="./CL_iconSequence.png" style="width:560px;height:auto; bottom:0; right:0; position:fixed">
