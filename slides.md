@@ -321,6 +321,31 @@ Exchange ghost data between **nodes** over the **network** automatically if anyt
 </v-click>
 </div>
 
+<v-click>
+<div class="grid grid-cols-[34%_60%] gap-3" style="margin-top:15mm">
+
+## How to turn it on?
+
+```bash
+$ cd build/
+$ cmake -DMPI=ON ..
+$ make
+$ mpirun -n 16 ./lphi4 input=./lphi4.in
+```
+</div>
+<div class="grid grid-cols-[34%_60%] gap-3" style="margin-top:5mm" v-click>
+
+<div>You may need to install fftw3 with MPI support.</div>
+
+<div>
+```bash
+$ sudo apt-get install libfftw3-mpi-dev 
+```
+</div>
+
+</div>
+</v-click>
+
 
 ---
 layout: default
