@@ -711,10 +711,54 @@ Parallel (grid-based) work,
   </div>
 </div>
 
-<div class="grid grid-cols-[3%_32%_28%_35%] gap-5" style="margin-top:-10mm;" >
+<div v-click="[1, 5]" style="margin-top:-10mm;">
+
+<div class="grid grid-cols-[1%_37%_17%_35%] gap-5" style="margin-top:-10mm;" >
+  <div>  </div>
+  <div> 
+
+ $$
+ \textrm{expression} = \pi(t) + \Delta_L \phi(t) \cdot dt
+ $$ 
+
+<v-click at=3>
+
+ ```cpp
+auto functor = DEVICE_LAMBDA(device::IdxArray<NDim> idx, double& max) {
+  // ...
+};
+double maximum = 0.;
+ ```
+ </v-click>
+
+  </div>
+  <div>
+  <div style="margin-left:8mm; margin-top:4mm;"><small> Time evolution </small></div>
+  <div style="margin-left:12mm; margin-top:4mm;" v-click=3><small> Maximum </small></div>
+  </div>
+
+  <div> 
+<v-click at=2>
+
+ $$
+ \pi(t+dt) = \textrm{expression}
+ $$ 
+ </v-click>
+
+<v-click at=4>
+
+```cpp
+device::iteration::reduce("Maximum", functor, maximum);
+```
+ </v-click>
+  </div>
+</div>
+</div>
+
+<div class="grid grid-cols-[3%_32%_28%_35%] gap-5" style="margin-top:-35mm;" >
   <div>  </div>
   <div>
-<v-click at=3>
+<v-click at=5>
 
   **Standard C++ on CPU**
 </v-click>
@@ -722,7 +766,7 @@ Parallel (grid-based) work,
 
   <div>
 
-  <v-click at=4>
+  <v-click at=6>
 
   **Backends**
 
@@ -738,7 +782,7 @@ Parallel (grid-based) work,
   </div>
   <div>
 
-<v-switch at=4>
+<v-switch at=6>
 <template #0>
 
   **Hardware-dependent**
@@ -788,7 +832,120 @@ img {
   padding: 0px 0;
   width: 75%;
 }
+.slidev-code {
+  font-size: 0.5em !important;
+  line-height: 0.4em !important;
+  padding: 1em !important;
+}
 </style>
+
+
+---
+layout: default
+transition: fade
+zoom: 0.8
+---
+
+# Does this make CosmoLattice harder to use?
+
+<v-click>
+
+# No, but...
+</v-click>
+
+<div class="grid grid-cols-[50%_50%] gap-3">
+
+<div>
+<v-click at=2>
+<br>
+<div style="text-align: center">
+ <h2>Model file</h2>
+</div>
+<br>
+
+````md magic-move {at:3, lines:true}
+
+```cpp
+  public:
+
+    MODELNAME(ParameterParser &parser, RunParameters<double> &runPar, 
+        std::shared_ptr<MemoryToolBox> toolBox)
+      ...
+```
+
+```cpp
+  public:
+    static constexpr size_t NDim = Model<MODELNAME>::NDim;
+
+    MODELNAME(ParameterParser &parser, RunParameters<double> &runPar, 
+        std::shared_ptr<MemoryToolBox<NDim>> toolBox)
+      ...
+```
+````
+
+</v-click>
+</div>
+
+<div>
+<v-click at=4>
+<br>
+<div style="text-align: center">
+ <h2>TempLat</h2>
+</div>
+<br>
+
+````md magic-move {at:5, lines:true}
+
+```cpp
+vType computeConfigurationSpace() {
+  vType localResult{};
+
+  auto& it = mT.getToolBox()->itX();
+  for(it.begin();it.end();++it)
+  {
+    const ptrdiff_t i = it();
+    localResult += GetValue::get(mT,i);
+  }
+
+  return mWorkspace;
+}
+```
+
+```cpp
+vType computeConfigurationSpace() {
+  auto functor = DEVICE_CLASS_LAMBDA(const device::IdxArray<NDim> &idx, 
+                                     vType &update) {
+    device::apply([&](const auto &...args) {
+          update += GetValue::get(mT, args...);
+        },
+        idx);
+  };
+
+  vType localResult{};
+  device::iteration::parallel_reduce("Averager", mLayout, functor, 
+                                     localResult);
+  return localResult;
+}
+```
+````
+</v-click>
+</div>
+
+
+</div>
+
+---
+layout: fact
+transition: slide-left
+---
+
+## For "average" user: 
+&nbsp; &nbsp; 
+<h1> Only minimal changes &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</h1>
+
+&nbsp;
+
 
 ---
 layout: default
@@ -1009,8 +1166,8 @@ int main(int argc, char **argv)
       pi.updateGhosts();
       device::iteration::fence();
       measurer.measure("timestepping", [&]() {
-        pi = LatticeLaplacian<NDim, decltype(phi)>(phi); // kick
-        phi = phi + dt * pi;                             // drift
+        pi = pi + dt * LatticeLaplacian<NDim, decltype(phi)>(phi); // kick
+        phi = phi + dt * pi;                                       // drift
         device::iteration::fence();
       });
     }
@@ -1028,7 +1185,7 @@ int main(int argc, char **argv)
       pi.updateGhosts();
       device::iteration::fence();
       measurer.measure("timestepping", [&]() {
-        pi = LatticeLaplacian<NDim, decltype(phi)>(phi); // kick
+        pi = pi + dt * LatticeLaplacian<NDim, decltype(phi)>(phi); // kick
         phi = phi + dt * pi;                             // drift
         device::iteration::fence();
       });
@@ -1048,6 +1205,7 @@ int main(int argc, char **argv)
 <br>
 <br>
 &nbsp;&nbsp;<h2 color="green">CPU</h2>: Ryzen 9 7945HX - 16 Cores @ 5.4GHz
+
 </div>
 
 <div>
@@ -1060,6 +1218,9 @@ int main(int argc, char **argv)
 <style>
 h2 {
   display: inline;
+}
+.katex {
+    font-size: 1.0em;
 }
 </style>
 
@@ -1099,7 +1260,7 @@ zoom: 0.8
         device::iteration::fence();
       });
       measurer.measure("timestepping", [&]() {
-        pi = LatticeLaplacian<NDim, decltype(phi)>(phi);
+        pi = pi + dt * LatticeLaplacian<NDim, decltype(phi)>(phi);
         phi = phi + dt * pi;
         device::iteration::fence();
       });
@@ -1157,8 +1318,12 @@ transition: slide-left
 # Benchmarking $\phi^4$-theory 
 with the `lphi4` model in CosmoLattice
 
+<div id="overlay" style="margin-left:25mm;margin-top:12mm" v-click>
+preliminary
+</div> 
+
 <div class="grid grid-cols-[30%_30%_30%] gap-4">
-<div><ImageFigure
+<div v-click><ImageFigure
   src="/bench_128.png"
   height="90%"
   width="auto"
@@ -1177,10 +1342,11 @@ with the `lphi4` model in CosmoLattice
 /></div>
 </div>
 
-<div class="grid grid-cols-[25%_45%_30%] gap-4" style="margin-top:-20mm;" v-click>
-<div>
-</div>
-<div>
+<div class="grid grid-cols-[25%_45%_30%] gap-4" style="margin-top:-20mm;">
+
+<div></div>
+
+<div v-click>
 ```
 ┌───────┬─────────────┬─────────────┬─────────────┬──────────────────┐
 │       │        CUDA │      OpenMP │         MPI │ speedup CUDA/MPI │
@@ -1192,6 +1358,18 @@ with the `lphi4` model in CosmoLattice
 └───────┴─────────────┴─────────────┴─────────────┴──────────────────┘
 ```
 </div>
+
+<div style="font-size:0.7em">
+<br>
+<br>
+<br>
+<v-click at=4>
+<br>
+Slightly unfair comparison <br>
+(my CPU is "stronger")
+</v-click>
+</div>
+
 </div>
 
 <style>
@@ -1200,11 +1378,23 @@ with the `lphi4` model in CosmoLattice
   line-height: 0.4em !important;
   padding: 1em !important;
 }
+#overlay {
+position: fixed; /* Sit on top of the page content */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
+
+  font-size: 100px;
+  text-transform: uppercase;
+  font-family: "Oswald", sans-serif;
+  transform: rotate(15deg)
+             skew(-15deg);
+  color: rgba(1,1,1,0.2)
+}
 </style>
 
 ---
 layout: default
-transition: slide-left
+transition:
 ---
 
 <div class="grid grid-cols-[45%_15%_40%] gap-3">
