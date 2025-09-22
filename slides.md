@@ -78,7 +78,7 @@ $$
 \end{aligned}
 $$
 
-*(We use the leapfrog scheme.)*
+*(Leapfrog scheme.)*
 </template>
 </v-switch>
 
@@ -148,19 +148,24 @@ layout: fact
 transition: slide-down
 ---
 
-<h1> Parallelization </h1> of CosmoLattice simulations requires to split both <h2>computation</h2> and <h2>data</h2> across <h2>nodes</h2>.
-
-<v-click>
-<div class="grid grid-cols-[15%_60%] gap-3" style="margin-top:25mm">
+<div class="grid grid-cols-[15%_60%] gap-3" style="margin-bottom:20mm">
 <div></div>
 <div>
 
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<h3>Type</h3> | <h2>distributed</h2> | <h2>shared</h2>  |
 | --- | -- | ---- |
-| <h3>Data</h3> | split between nodes | shared by all <b>threads</b> |
-| <h3>Computation</h3> | split between nodes | split between threads |
+| <h3>Data</h3> | split between <b>nodes</b> | shared by all <b>threads</b> |
+| <h3>Computation</h3> | split between <b>nodes</b> | split between <b>threads</b> |
 </div>
 </div>
+
+<v-click>
+<h1> Parallelization </h1> of CosmoLattice simulations requires to split both <h2>computation</h2> and <h2>data</h2> across <h2>cores</h2>.
+</v-click>
+
+<v-click>
+<br><br>
+<h2>Cores:</h2> <b>Nodes</b> (distributed) and <b> Threads </b> (shared).
 </v-click>
 
 <style>
@@ -295,7 +300,7 @@ The standard for communication in distributed-memory applications:
 
 <b>M</b>essage <b>P</b>assing <b>I</b>nterface (MPI)
 
-Exchange ghost data over the network automatically after something changes.
+Exchange ghost data between **nodes** over the **network** automatically if anything changes.
 
 </div>
 
@@ -337,7 +342,86 @@ transition: slide-left
 -  To keep data transfer due to ghost exchange manageable, parallelization along $d-1$ directions.
 </v-clicks>
 
-<v-click at=3>
+<v-switch at=3>
+<template #1>
+<div class="grid grid-cols-[33%_33%_33%] gap-3" style="margin-bottom:-15mm; margin-top:-2mm">
+<div>
+<h1 style="text-align:center;">1D</h1>
+$$
+N = n_p * m
+$$
+</div>
+<div style="margin-top:11mm">
+$$
+\begin{align*}
+  N = 50
+\end{align*}
+$$
+</div>
+<div>
+<h1 style="text-align:center;">2D</h1>
+$$
+\begin{align*}
+N &= n^{(1)}_p * m \\
+  &= n^{(2)}_p * m
+\end{align*}
+$$
+</div>
+</div>
+</template>
+
+<template #2>
+<div class="grid grid-cols-[33%_33%_33%] gap-3" style="margin-bottom:-15mm; margin-top:-2mm">
+<div>
+<h1 style="text-align:center;">1D</h1>
+$$
+N = n_p * m
+$$
+</div>
+<div style="margin-top:11mm">
+$$
+\begin{align*}
+  N = 50
+\end{align*}
+$$
+</div>
+<div>
+<h1 style="text-align:center;">2D</h1>
+$$
+\begin{align*}
+N &= n^{(1)}_p * m \\
+  &= n^{(2)}_p * m
+\end{align*}
+$$
+</div>
+</div>
+<div > &nbsp;</div>
+<div class="grid grid-cols-[50%_50%] gap-3">
+<div>
+$$
+\begin{align*}
+n_p \in \{1,2,5,10,25,50\}
+\end{align*}
+$$
+</div>
+<div>
+$$
+\begin{align*}
+(n_p^{(1)}, n_p^{(2)}) \in \{
+  &(2, 1),(2,2), \\
+  &(5, 1),(5,2), \\
+  &(10, 2),(5,5), \\
+  &(10, 5),(10,10), \\
+  &(25, 5),(25,10), \\
+  &(25, 25),(25,10)
+\}
+\end{align*}
+$$
+</div>
+</div>
+</template>
+
+<template #3>
 <div class="grid grid-cols-[10%_75%] gap-3">
 <div></div>
 <div>
@@ -354,7 +438,8 @@ from the EPFL HPC center SCITAS, Switzerland).
 <br>
 </div>
 </div>
-</v-click>
+</template #0>
+</v-switch>
 </div>
 
 <div style="margin-top:-5mm">
@@ -364,14 +449,13 @@ from the EPFL HPC center SCITAS, Switzerland).
   width="100%"
   height="auto"
 />
-<v-click at=1>
+
 <ImageFigure
   src="/Cube_2D.png"
   caption=""
   width="100%"
   height="auto"
 />
-</v-click>
 </div>
 </div>
 
@@ -526,7 +610,7 @@ Lattice points independently computed & updated
 
 **GPU**: &nbsp; High parallelization, moderate clock speed
 
-&nbsp; <mdi-arrow-right/> CosmoLattice on GPUs has the potential for *massive parallelism* with $> \mathcal{10^5}$ simultaneous operations.
+&nbsp; <mdi-arrow-right/> CosmoLattice on GPUs has the potential for *massive parallelism* with $\gg \mathcal{10^5}$ simultaneous operations.
 </v-click>
 &nbsp;
 
