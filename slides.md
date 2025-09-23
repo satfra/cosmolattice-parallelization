@@ -66,14 +66,14 @@ Example: Solving massless Klein-Gordon equation, $d=1$
 <template #0>
 $$
 \begin{aligned}
-\partial_t^2 \phi(i) = \Delta_L \phi(i)
+\partial_t^2 \phi(i) = \Delta^+_i\Delta^-_i \phi(i)
 \end{aligned}
 $$
 </template>
 <template #1-7>
 $$
 \begin{aligned}
-\partial_t \pi(i) &= \Delta_L \phi(i) \,, \\
+\partial_t \pi(i) &= \Delta^+_i\Delta^-_i \phi(i) \,, \\
 \partial_t \phi(i) &= \pi(i) \,.
 \end{aligned}
 $$
@@ -203,12 +203,12 @@ Example: Solving massless Klein-Gordon equation, $d=1$
 
 $$
 \begin{aligned}
-\partial_t \pi(i) &= \Delta_L \phi(i) \,, \\
+\partial_t \pi(i) &= \Delta^+_i\Delta^-_i \phi(i) \,, \\
 \partial_t \phi(i) &= \pi(i) \,.
 \end{aligned}
 $$
 
-*(We use the leapfrog scheme.)*
+*(Leapfrog scheme.)*
 
 Stencil of update for **one** lattice site is $s = 1$
 
@@ -421,7 +421,7 @@ $$
 </div>
 </div>
 <div > &nbsp;</div>
-<div class="grid grid-cols-[50%_50%] gap-3">
+<div class="grid grid-cols-[50%_50%] gap-3" style="margin-top:2mm">
 <div>
 $$
 \begin{align*}
@@ -447,6 +447,49 @@ $$
 </template>
 
 <template #3>
+<div class="grid grid-cols-[33%_33%_33%] gap-3" style="margin-bottom:-15mm; margin-top:-2mm">
+<div>
+<h1 style="text-align:center;">1D</h1>
+$$
+N = n_p * m
+$$
+</div>
+<div style="margin-top:11mm">
+$$
+\begin{align*}
+  N = 50
+\end{align*}
+$$
+
+<br>
+Maximum parallelization
+</div>
+<div>
+<h1 style="text-align:center;">2D</h1>
+$$
+\begin{align*}
+N &= n^{(1)}_p * m \\
+  &= n^{(2)}_p * m
+\end{align*}
+$$
+</div>
+</div>
+<div > &nbsp;</div>
+<div class="grid grid-cols-[50%_50%] gap-3">
+<div  style="margin-left:16mm;">
+<br>
+
+$50$ nodes.
+</div>
+<div  style="margin-left:35mm;">
+<br>
+
+$25^2 = 625$ nodes.
+</div>
+</div>
+</template>
+
+<template #4>
 <div class="grid grid-cols-[10%_75%] gap-3">
 <div></div>
 <div>
@@ -743,13 +786,14 @@ Parallel (grid-based) work,
   <div> 
 
  $$
- \textrm{expression} = \pi(t) + \Delta_L \phi(t) \cdot dt
+ \textrm{expression} = \pi(t) + dt \cdot \Delta \phi(t)
  $$ 
 
 <v-click at=3>
 
  ```cpp
-auto functor = DEVICE_LAMBDA(device::IdxArray<NDim> idx, double& max) {
+auto functor = DEVICE_LAMBDA(device::IdxArray<NDim> idx, 
+                              double& max) {
   // ...
 };
 double maximum = 0.;
@@ -780,7 +824,7 @@ device::iteration::reduce("Maximum", functor, maximum);
 </div>
 </div>
 
-<div class="grid grid-cols-[3%_32%_28%_35%] gap-5" style="margin-top:-35mm;" >
+<div class="grid grid-cols-[3%_32%_28%_35%] gap-5" style="margin-top:-37mm;" >
   <div>  </div>
   <div>
 <v-click at=5>
@@ -829,8 +873,8 @@ device::iteration::reduce("Maximum", functor, maximum);
 
 <small>
 
-  - `device::iterate::parallel_for`
-  - `device::iterate::parallel_reduce`
+  - `device::iterate::foreach`
+  - `device::iterate::reduce`
   - `device::memory::copyHostToDevice`
   - ...
 
@@ -947,8 +991,7 @@ vType computeConfigurationSpace() {
   };
 
   vType localResult{};
-  device::iteration::parallel_reduce("Averager", mLayout, functor, 
-                                     localResult);
+  device::iteration::reduce("Averager", cLayout, functor, localResult);
   return localResult;
 }
 ```
@@ -1323,13 +1366,19 @@ zoom: 0.8
 
 -  Fourier transformation is not yet optimized.
 
-<br><div style="margin-left:10mm; margin-top:-12mm; font-size:0.7em">(take later benchmarks with a grain of salt!)</div>
+<br>
+
+<div style="margin-left:10mm; margin-top:-8mm; font-size:0.7em">(take later benchmarks with a grain of salt!)</div>
 </v-click>
-<v-click at=4>
+<v-click at=4><br>
 
 -  Much faster random numbers: **Philox** algorithm.
+<span style="font-size:0.5em"><br>\[Salmon et al., "Parallel random numbers: As easy as 1, 2, 3"\]
+</span>
 
-<br><div style="margin-left:10mm; margin-top:-12mm; font-size:0.7em">(deterministic, stateless and fully parallel)</div>
+<br>
+
+<div style="margin-left:10mm; margin-top:-18mm; font-size:0.7em">(<i>counter-based</i>, deterministic, stateless and fully parallel)</div>
 </v-click>
 </div>
 </div>
