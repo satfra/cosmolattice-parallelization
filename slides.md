@@ -144,7 +144,16 @@ layout: fact
 transition: slide-down
 ---
 
-<div class="grid grid-cols-[15%_60%] gap-3" style="margin-bottom:20mm">
+<h1> Parallelization </h1> of CosmoLattice simulations requires to split both <h2>computation</h2> and <h2>data</h2> across <h2>cores</h2>.
+
+<v-click>
+<br><br>
+<br>
+<h2>Cores:</h2> <b>Nodes</b> (distributed) and <b> Threads </b> (shared).
+</v-click>
+
+<v-click>
+<div class="grid grid-cols-[15%_60%] gap-3" style="margin-top:10mm">
 <div></div>
 <div>
 
@@ -154,14 +163,6 @@ transition: slide-down
 | <h3>Computation</h3> | split between <b>nodes</b> | split between <b>threads</b> |
 </div>
 </div>
-
-<v-click>
-<h1> Parallelization </h1> of CosmoLattice simulations requires to split both <h2>computation</h2> and <h2>data</h2> across <h2>cores</h2>.
-</v-click>
-
-<v-click>
-<br><br>
-<h2>Cores:</h2> <b>Nodes</b> (distributed) and <b> Threads </b> (shared).
 </v-click>
 
 <style>
