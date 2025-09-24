@@ -953,6 +953,63 @@ zoom: 0.8
 ````
 
 </v-click>
+
+<v-click at=6>
+<br>
+<div style="text-align: center">
+ <h2>Building</h2>
+</div>
+<br>
+
+<v-switch at=6>
+<template #1>
+Cosmolattice up to now:
+</template>
+<template #2>
+New version: CUDA is detected automatically:
+</template>
+<template #3>
+Granular control: shared memory OpenMP through Kokkos
+</template>
+</v-switch>
+
+````md magic-move {at:7, lines:true}
+
+```bash
+$ cmake .. -DMODEL=lphi4
+...
+```
+
+```bash
+$ cmake .. -DMODEL=lphi4
+...
+-- Device configuration: 
+    CUDA: ON 
+    HIP: OFF 
+    OpenMP: OFF 
+    Threads: OFF
+-- Using Kokkos as device provider.
+...
+```
+
+```bash
+$ cmake .. -DMODEL=lphi4 -DDEVICE=KOKKOS -DCUDA=OFF
+...
+-- Device configuration: 
+    CUDA: OFF 
+    HIP: OFF 
+    OpenMP: ON 
+    Threads: OFF
+-- Using Kokkos as device provider.
+...
+```
+
+````
+
+</v-click>
+
+
+
 </div>
 
 <div>
@@ -1340,8 +1397,7 @@ zoom: 0.8
 
 <div>
 
-<v-switch>
-<template #1-3>
+<v-click>
 <div style="height:380px">
 <ImageFigure
   src="/split_0.png"
@@ -1349,28 +1405,18 @@ zoom: 0.8
   width="auto"
 />
 </div>
-</template>
-<template #3-5>
-<div style="height:380px">
-<ImageFigure
-  src="/split_1.png"
-  height="90%"
-  width="auto"
-/>
-</div>
-</template>
-</v-switch>
+</v-click>
 
 <div style="margin-left:10mm;">
 <v-click at=2>
 
--  Fourier transformation is not yet optimized.
+-  Fourier transformation: `cuFFT`
 
 <br>
 
-<div style="margin-left:10mm; margin-top:-8mm; font-size:0.7em">(take later benchmarks with a grain of salt!)</div>
+<div style="margin-left:10mm; margin-top:-8mm; font-size:0.7em">(automatic switch to GPU native FFTs)</div>
 </v-click>
-<v-click at=4><br>
+<v-click at=3><br>
 
 -  Much faster random numbers: **Philox** algorithm.
 <span style="font-size:0.5em"><br>\[Salmon et al., "Parallel random numbers: As easy as 1, 2, 3"\]
