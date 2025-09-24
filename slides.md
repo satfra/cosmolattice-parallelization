@@ -88,11 +88,7 @@ Stencil of update for **one** lattice site is $s = 1$
 </v-click>
 
 <v-click at=3>
-<br>&nbsp;&nbsp;  <mdi-arrow-right/> Each site can be updated independently.
-</v-click>
-
-<v-click at=4>
-<br>&nbsp;&nbsp;  <mdi-arrow-right/> Only local information needed (neighbours).
+&nbsp;&nbsp;  <mdi-arrow-right/> Only local information needed (neighbours).
 </v-click>
 
 </div>
@@ -105,7 +101,7 @@ Stencil of update for **one** lattice site is $s = 1$
   height="auto"
 />
 
-<v-click at=5>
+<v-click at=4>
 
 ## We could compute all lattice sites independently!
 
@@ -212,8 +208,8 @@ $$
 
 Stencil of update for **one** lattice site is $s = 1$
 
-<br>&nbsp;&nbsp;  <mdi-arrow-right/> Each site can be updated independently.
-<br>&nbsp;&nbsp;  <mdi-arrow-right/> Only local information needed (neighbours).
+&nbsp;&nbsp;  <mdi-arrow-right/> Only local information needed (neighbours).
+<br><br>&nbsp;&nbsp;  <mdi-arrow-right/> Each site can be updated independently.
 </div>
 
 <div style="margin-top:23mm">
@@ -1311,7 +1307,7 @@ int main(int argc, char **argv)
       device::iteration::fence();
       measurer.measure("timestepping", [&]() {
         pi = pi + dt * LatticeLaplacian<NDim, decltype(phi)>(phi); // kick
-        phi = phi + dt * pi;                             // drift
+        phi = phi + dt * pi;                                       // drift
         device::iteration::fence();
       });
     }
@@ -1405,9 +1401,13 @@ zoom: 0.8
   width="auto"
 />
 </div>
+<div style="margin-left:20mm; margin-top:-6mm; font-size:0.6em">CPU on MPI, GPU on CUDA</div>
 </v-click>
-
 <div style="margin-left:10mm;">
+
+</div>
+
+<div style="margin-left:10mm;margin-top:5mm">
 <v-click at=2>
 
 -  Fourier transformation: `cuFFT`
@@ -1432,11 +1432,11 @@ zoom: 0.8
 
 ---
 layout: default
-transition: slide-left
+transition: fade
 ---
 
-# Benchmarking $\phi^4$-theory 
-with the `lphi4` model in CosmoLattice
+# Benchmarking $\phi^4$-theory
+<span style="position:relative;top:-12px;">with the `lphi4` model in CosmoLattice</span>
 
 <div id="overlay" style="margin-left:25mm;margin-top:12mm" v-click>
 preliminary
@@ -1462,19 +1462,19 @@ preliminary
 /></div>
 </div>
 
-<div class="grid grid-cols-[25%_45%_30%] gap-4" style="margin-top:-20mm;">
+<div class="grid grid-cols-[25%_43.2%_30%] gap-4" style="margin-top:-20mm;">
 
 <div></div>
 
-<div v-click>
-```
+<div v-click at=4>
+```ts
 ┌───────┬─────────────┬─────────────┬─────────────┬──────────────────┐
 │       │        CUDA │      OpenMP │         MPI │ speedup CUDA/MPI │
 │       │ runtime [s] │ runtime [s] │ runtime [s] │           factor │
 ├───────┼─────────────┼─────────────┼─────────────┼──────────────────┤
-│ N=128 │          27 │          58 │          53 │                2 │
-│ N=256 │         216 │         951 │         920 │                4 │
-│ N=512 │        2260 │       14147 │       15471 │                7 │
+│ N=128 │         2.6 │         6.9 │         7.3 │              2.8 │
+│ N=256 │        19.5 │       164.9 │       140.4 │              7.2 │
+│ N=512 │       283.1 │      1820.6 │      2224.7 │              7.9 │
 └───────┴─────────────┴─────────────┴─────────────┴──────────────────┘
 ```
 </div>
@@ -1483,7 +1483,7 @@ preliminary
 <br>
 <br>
 <br>
-<v-click at=4>
+<v-click at=5>
 <br>
 Slightly unfair comparison <br>
 (my CPU is "stronger")
@@ -1491,6 +1491,62 @@ Slightly unfair comparison <br>
 </div>
 
 </div>
+
+<style>
+.slidev-code {
+  font-size: 0.5em !important;
+  line-height: 0.4em !important;
+  padding: 0.3em !important;
+}
+#overlay {
+position: fixed; /* Sit on top of the page content */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
+
+  font-size: 100px;
+  text-transform: uppercase;
+  font-family: "Oswald", sans-serif;
+  transform: rotate(15deg)
+             skew(-15deg);
+  color: rgba(1,1,1,0.2)
+}
+</style>
+
+---
+layout: default
+transition: slide-left
+---
+
+# Benchmarking $\phi^4$-theory 
+<span style="position:relative;top:-12px;">with the `lphi4` model in CosmoLattice</span>
+
+<div id="overlay" style="margin-left:25mm;margin-top:12mm">
+preliminary
+</div> 
+
+<div class="grid grid-cols-[50%_50%] gap-4" style="margin-top:-6mm">
+<div v-click style="margin-left:15mm"><ImageFigure
+  src="/av_512.png"
+  height="92%"
+  width="auto"
+/></div>
+<div v-click style="margin-left:15mm"><ImageFigure
+  src="/V_512.png"
+  height="92%"
+  width="auto"
+/></div>
+</div>
+
+<div style="position:absolute; top:120px; left:435px">
+
+$N=512$
+</div>
+
+<div v-click style="margin-top:-18mm;margin-left:55mm"><ImageFigure
+  src="/dE_512.png"
+  height="75%"
+  width="auto"
+/></div>
 
 <style>
 .slidev-code {
