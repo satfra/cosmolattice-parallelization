@@ -146,14 +146,14 @@ transition: slide-down
 
 <h1> Parallelization </h1> of CosmoLattice simulations requires to split both <h2>computation</h2> and <h2>data</h2> across <h2>cores</h2>.
 
-<v-click>
+<div v-click="[1,3]" style="margin-top:-5mm;">
 <br><br>
 <br>
 <h2>Cores:</h2> <b>Nodes</b> (distributed) and <b> Threads </b> (shared).
-</v-click>
+</div>
 
-<v-click>
-<div class="grid grid-cols-[15%_60%] gap-3" style="margin-top:10mm">
+<div v-click="[2,3]">
+<div class="grid grid-cols-[15%_60%] gap-3" style="margin-top:10mm;">
 <div></div>
 <div>
 
@@ -163,7 +163,41 @@ transition: slide-down
 | <h3>Computation</h3> | split between <b>nodes</b> | split between <b>threads</b> |
 </div>
 </div>
-</v-click>
+</div>
+
+<div v-click=3 style="position:absolute; top:250px; left:50px;">
+<div class="grid grid-cols-[35%_35%_70%]">
+
+<div v-click=4>
+<ImageFigure
+  src="/amdahl.png"
+  caption=""
+  width="95%"
+  height="auto"
+/>
+</div>
+
+<div>
+$$
+\textrm{speedup} = \frac{1}{(1-\alpha)+\frac{\alpha}{n_\textrm{cores}}}
+$$
+<br>
+
+CosmoLattice: $\alpha \gtrsim 0.99$ <br><small>(see manual)</small>
+
+</div>
+
+<div style="margin-left:-55mm">
+<br>
+<br>
+
+$\alpha$ = part of the code which runs in parallel
+<br>
+$n_\textrm{cores}$ = speedup of the parallel part
+</div>
+
+</div>
+</div>
 
 <style>
 h1 {
@@ -515,12 +549,14 @@ from the EPFL HPC center SCITAS, Switzerland).
   height="auto"
 />
 
+<v-click at=1>
 <ImageFigure
   src="/Cube_2D.png"
   caption=""
   width="100%"
   height="auto"
 />
+</v-click>
 </div>
 </div>
 
