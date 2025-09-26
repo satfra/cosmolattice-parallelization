@@ -317,6 +317,7 @@ h2 {
 }
 </style>
 
+
 ---
 layout: default
 transition: slide-left
@@ -456,7 +457,7 @@ $$
 <div>
 $$
 \begin{align*}
-n_p \in \{1,2,5,10,25,50\}
+n_p \in \{1,2,5,10,25\}
 \end{align*}
 $$
 </div>
@@ -510,7 +511,7 @@ $$
 <div  style="margin-left:16mm;">
 <br>
 
-$50$ nodes.
+$25$ nodes.
 </div>
 <div  style="margin-left:35mm;">
 <br>
@@ -565,6 +566,62 @@ from the EPFL HPC center SCITAS, Switzerland).
     font-size: 1.0em;
 }
 </style>
+
+---
+layout: default
+transition: fade
+---
+
+# Going to larger clusters
+
+<div class="grid grid-cols-[40%_15%_40%] gap-3" style="margin-top:50px">
+
+<v-switch at=0>
+<template #0>
+<h3 style="margin-left:70px">Strong scaling</h3>(same lattice size, more cores)<br><br>
+<ImageFigure
+  src="/scaling_1.png"
+  caption=""
+  width="100%"
+  height="auto"
+/>
+</template>
+<template #1>
+<h3 style="margin-left:70px">Weak scaling</h3>(lattice size ~ cores)<br><br>
+<ImageFigure
+  src="/scaling_3.png"
+  caption=""
+  width="100%"
+  height="auto"
+/>
+</template>
+</v-switch>
+
+<div></div>
+
+<v-switch at=0>
+<template #0>
+<h3>&nbsp;</h3><br><br>
+<ImageFigure
+  src="/scaling_2.png"
+  caption=""
+  width="100%"
+  height="auto"
+/>
+</template>
+<template #1>
+<h3>&nbsp;</h3><br><br>
+<ImageFigure
+  src="/scaling_4.png"
+  caption=""
+  width="100%"
+  height="auto"
+/>
+</template>
+</v-switch>
+</div>
+
+
 
 ---
 layout: end
@@ -696,7 +753,7 @@ Lattice points independently computed & updated
   <small>
   
 -  Nvidia H100: **~15000**
--  Nvidia RTX4070m: **~5000**
+-  Nvidia 4070 RTX mobile: **~5000**
 
 </small>
   </div>
@@ -725,7 +782,7 @@ transition: slide-left
 Lattice points independently computed & updated 
       <mdi-arrow-right/> Limit of threads is number of lattice sites!
 
-<div class="grid grid-cols-[25%_50%_25%] gap-3">
+<div class="grid grid-cols-[24%_50%_25%] gap-3">
   <div>
   </div>
   <div>
@@ -891,11 +948,11 @@ device::iteration::reduce("Maximum", functor, maximum);
 
 <small>
 
-  - NVIDIA: CUDA
+  - Nvidia: CUDA
   - AMD: ROCM
   - Intel: SYCL
   - shared-memory CPUs
-  - FPGPAs
+  - FPGAs
 
 </small>
 </template>
@@ -1232,7 +1289,7 @@ $$
 <v-click at=3>
 
 **CPU**:
- <span class="font-bold" color="green">Sequential access pattern</span> allows for caching of subsequent operations of a single thread.
+ <span class="font-bold" color="green">Cashed access pattern</span> allows for caching of subsequent operations of a single thread.
 </v-click>
 
 <v-click at=4>
@@ -1262,7 +1319,7 @@ transition: slide-left
   <div>
 
 # Memory access patterns
-Coalescing vs. sequential access
+Coalesced vs. cached access
 
 Example: Solving massless Klein-Gordon equation in $d=3$,
 $$
@@ -1359,7 +1416,7 @@ int main(int argc, char **argv)
 
 # Running this on my PC:
 <br>
-&nbsp;&nbsp;<h2 color="purple">GPU</h2>: NVIDIA 4070RTX mobile - 4788 Cores @ 2.175 GHz<br>
+&nbsp;&nbsp;<h2 color="purple">GPU</h2>: Nvidia 4070RTX mobile - 4788 Cores @ 2.175 GHz<br>
 <br>
 <br>
 &nbsp;&nbsp;<h2 color="green">CPU</h2>: Ryzen 9 7945HX - 16 Cores @ 5.4GHz
@@ -1607,7 +1664,7 @@ position: fixed; /* Sit on top of the page content */
 
 ---
 layout: default
-transition:
+transition: slide-left
 ---
 
 <div class="grid grid-cols-[45%_15%_40%] gap-3">
@@ -1643,7 +1700,7 @@ Using large GPU clusters
   
   </div>
 
--  No changes in MPI-code!
+-  No changes in MPI-code!<small>&nbsp;&nbsp;except in FFT code...</small>
 
 </v-click>
 
@@ -1662,6 +1719,36 @@ Using large GPU clusters
 </template>
 </v-switch>
 </div>
+</div>
+
+---
+layout: default
+transition: slide-left
+---
+
+<div class="grid grid-cols-[85%_15%_40%] gap-3">
+  <div>
+
+# There's more...
+
+Useful, more fine-grained parallelization for even more speedup in the future:<br><br>
+
+<v-clicks>
+
+-  Hierarchical parallelism.<br>
+<small>split complex tasks into smaller work-teams with the potential for caching</small><br><br>
+
+-  Block- and Warp- local caching. <br>
+<small>reduce the number of repeated operations</small><br><br>
+
+-  Heterogeneous work-balancing.<br>
+<small>e.g. use CPU for measurements while the GPU continues evolving</small><br><br>
+
+-  ...
+
+</v-clicks>
+
+  </div>
 </div>
 
 ---
